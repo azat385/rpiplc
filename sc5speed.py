@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 print u"Content-type: text/html; charset=utf-8\n\n"
 
-#mycomment=новые комментарии
+#mycomment=новые комментарии да да
 
 from pymodbus.client.sync import ModbusTcpClient as ModbusClient
 
