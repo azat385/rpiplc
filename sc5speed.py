@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 print u"Content-type: text/html; charset=utf-8\n\n"
 
-#mycomment=like dir cmd
+#mycomment=новые комментарии
 
 from pymodbus.client.sync import ModbusTcpClient as ModbusClient
 
