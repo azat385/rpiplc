@@ -4,7 +4,6 @@ print u"Content-type: text/html; charset=utf-8\n\n"
 
 #mycomment=like dir cmd
 
-from pymodbus.transaction import ModbusSocketFramer as mrstr2
 from pymodbus.client.sync import ModbusTcpClient as ModbusClient
 
 from time import sleep
