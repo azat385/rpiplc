@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 print u"Content-type: text/html; charset=utf-8\n\n"
 
-#mycomment=тест скорости RTU
+#mycomment=тест скорости RTU sync
 
 from pymodbus.client.sync import ModbusSerialClient as ModbusRtuClient
 
@@ -17,7 +17,7 @@ sleep_time=0.2;#in sec
 
 try:
 	print'Открываем соединение...'
-	client = ModbusRtuClient(method="rtu",port="/dev/ttyUSB0",stopbits=1,bytesize=8,parity="O",baudrate=115200,timeout=0.05);
+	client = ModbusRtuClient(method="rtu",port="/dev/ttyUSB0",stopbits=1,bytesize=8,parity="O",baudrate=115200,timeout=0.01);
 	print client
 	client.connect(); print'Установили соединение'
 	start_address = 0x00; regs=8;i=0;
