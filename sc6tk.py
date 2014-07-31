@@ -16,7 +16,7 @@ import psutil
 
 slavesArr = [5]
 iterSp = 10**4 #кол-во повторов
-regsSp = 32 #кол-вщ регистров
+regsSp = 8 #кол-вщ регистров
 portName = '/dev/ttyUSB0'
 baudrate = 115200
 
@@ -92,7 +92,7 @@ while (1):
    for slaveId in slavesArr:
     try:
         #tkmc.execute(slaveId, tkCst.READ_HOLDING_REGISTERS, 0,regsSp)
-	for _ in range(2):
+	for _ in range(1):
 		rr=tkmc.execute(slaveId, tkCst.READ_DISCRETE_INPUTS, 0,regsSp)
 	
 	rq=input_assign(rr)
