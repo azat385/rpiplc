@@ -4,7 +4,7 @@ print u"Content-type: text/html; charset=utf-8\n\n"
 
 #mycomment=тест скорости RTU sync
 
-from pymodbus.client.async import ModbusSerialClient as ModbusRtuClient
+from pymodbus.client.sync import ModbusSerialClient as ModbusRtuClient
 
 from time import sleep
 

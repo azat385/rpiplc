@@ -10,14 +10,13 @@ import serial
 import modbus_tk.defines as tkCst
 import modbus_tk.modbus_rtu as tkRtu
 
-from pymodbus.client.sync import ModbusSerialClient as pyRtu
-
-import psutil
+import memcache
+import pylibmc
 
 slavesArr = [5]
 iterSp = 10**4 #кол-во повторов
 regsSp = 8 #кол-вщ регистров
-portName = '/dev/ttyUSB1'
+portName = '/dev/ttyUSB0'
 baudrate = 115200
 
 timeoutSp=0.01 + regsSp*0
@@ -53,29 +52,6 @@ def input_assign(raw_in):
 	myinput.append(not(i));
     return myinput;
 
-"""
-pymc = pyRtu(method='rtu', port=portName , baudrate=baudrate, timeout=timeoutSp, parity='O')
-
-errCnt = 0
-startTs = time.time()
-for i in range(iterSp):
-  for slaveId in slavesArr:
-    try:
-	#pymc.read_holding_registers(0,regsSp,unit=slaveId)
-	rr=pymc.read_discrete_inputs(0,regsSp,unit=slaveId)
-	print rr.bits
-    except:
-        errCnt += 1
-        tb = traceback.format_exc()
-stopTs = time.time()
-timeDiff = stopTs  - startTs
-print "pymodbus:\ttime to read %s x %s (x %s regs): %.3f [s] / %.3f [s/req]" % (len(slavesArr),iterSp, regsSp, timeDiff, timeDiff/iterSp)
-if errCnt >0:
-    print "   !pymodbus:\terrCnt: %s; last tb: %s" % (errCnt, tb)
-pymc.close()
-"""
-
-
 
 tkmc = tkRtu.RtuMaster(serial.Serial(port=portName, baudrate=baudrate,parity='O'))
 tkmc.set_timeout(timeoutSp)
@@ -87,11 +63,14 @@ wr_prev=[]
 
 startTs = time.time()
 #for i in range(iterSp):
+#shared = memcache.Client(['127.0.0.1:11211'], debug=0)
+shared = pylibmc.Client(["127.0.0.1"], binary=True)
+shared.behaviors = {"tcp_nodelay": True, "ketama": True}
+
 while (1):
   try:
    for slaveId in slavesArr:
     try:
-        #tkmc.execute(slaveId, tkCst.READ_HOLDING_REGISTERS, 0,regsSp)
 	for _ in range(1):
 		rr=tkmc.execute(slaveId, tkCst.READ_DISCRETE_INPUTS, 0,regsSp)
 	
@@ -101,11 +80,6 @@ while (1):
 	     tkmc.execute(slaveId, tkCst.WRITE_MULTIPLE_COILS, 0, output_value=wr)
 	     wr_prev=wr
 	
-	#if not(rr[0]): tkmc.execute(slaveId, tkCst.WRITE_SINGLE_COIL,0,output_value=1);#print "send on";
-	#if rr[0]: tkmc.execute(slaveId, tkCst.WRITE_SINGLE_COIL,0,output_value=0);#print "send off";
-
-	#cpu_usage = psutil.cpu_percent()
-	#cpu_usage = getCPUuse()
 	cycle_freq = (i-errCnt+1)/(time.time()-startTs)
 	print "good rx:",i-errCnt,"bad rx:",errCnt,\
 		"CPU:",cpu_usage,\
@@ -115,6 +89,9 @@ while (1):
 		"cycle/s:",round(cycle_freq,2),\
 		"[ms]:",round(1000/cycle_freq,2),\
 		" \r",
+    	#shared.set('d_in', arr_to_str(rr));#shared.set('d_in1',arr_to_str(rq));shared.set('d_out',arr_to_str(wr));
+	#shared.set_multi({'d_in': arr_to_str(rr), 'd_in1': arr_to_str(rq), 'd_out':arr_to_str(wr),
+	#		  'good_rx': i-errCnt, 'bad_rx': errCnt, 'cycle_time':round(1000/cycle_freq,2) });
     except KeyboardInterrupt:
 	raise
     except:

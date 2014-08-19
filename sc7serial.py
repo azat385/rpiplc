@@ -34,6 +34,7 @@ while True:
 	" [ms] ",round(1000/freq,2),\
 	"\r",
 	j+=1
+	break
 """
 numOfLines = 0
 while True:
