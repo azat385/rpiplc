@@ -30,21 +30,25 @@ void main()
   options.c_iflag &= ~(IXON | IXOFF | IXANY);
   // Chose raw (not processed) output
   options.c_oflag &= ~OPOST;
+  tcflush(fd, TCIFLUSH);
 
   if ( tcsetattr( fd, TCSANOW, &options ) == -1 )
     printf ("Error with tcsetattr = %s\t", strerror ( errno ) );
   else
     printf ( "%s\t", "tcsetattr succeed" );
-
-  fcntl(fd, F_SETFL, FNDELAY);
+//  ioctl(fd,TCFLSH,0);   /*  clear serial input  buffer */
+//  ioctl(fd,TCFLSH,1);   /*  clear serial output buffer */
+//fcntl(fd, F_SETFL, FNDELAY);
+//write(ttyfd,query,8);    /*  send message to slave      */
 
   str="\x05\x02\x00\x00\x00\x08\x78\x48";
   n = write(fd, str, 8);
+//  ioctl(fd,TCFLSH,0);   /*  clear serial input  buffer */
   if (n < 0)
     fputs("write() of 8 bytes failed!\t", stderr);
   else
     printf ("Write succeed n = %i\t", n );
-  usleep(10000);
+  usleep(5000);
 
   char *buf;
   n = read( fd, buf, 6 );
@@ -71,4 +75,9 @@ int open_port(void)
  printf ( "In Open port fd = %i\t", fd);
 
   return (fd);
+}
+
+void prg()
+{
+	//prg();
 }
