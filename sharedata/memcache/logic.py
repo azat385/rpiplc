@@ -33,6 +33,7 @@ def main():
     shared["logic_sleep_ms"]=sleep_delay*1000
     timer1_start=time.time()
     timer1=0
+    p_prev=0
     while (1):
         try:
 	    #value = shared.get_multi(['d_in', 'cpu'])
@@ -43,15 +44,15 @@ def main():
 	    #main logic
 	    d_out[0] = d_in[0]
 	    d_out[1] = d_in[1]
+   	    if d_out <> d_out_prev : raise myException
+	    p = d_out[1]
+
 	    d_raise = lambda x,y: 1 if x and not(y) else 0
 	    if (d_raise(d_in[1],d_in_prev[1]) and not(d_in[0])): d_out[2] = 1
 	    if (d_raise(d_in[0],d_in_prev[0])): d_out[2] = 0
             if d_raise(d_in[0],d_in_prev[0]): d_out[3] = int(not(d_out[3]))
 	    
-   	    if d_out[1]<>d_out_prev[1]: 
-		print "Achtung"
-		raise myException
-	    print d_out[1],d_out_prev[1],timer1,time.time()-timer1_start,"\r"
+	    #print d_out[1],d_out_prev[1],timer1,time.time()-timer1_start,"\r"
 	    if d_raise(d_out[1],d_out_prev[1])==1 :	
 		timer1_start=time.time()
 		timer1 = 1
@@ -67,6 +68,8 @@ def main():
 	    shared["d_out"] = tuple(d_out)		#write current output and change list to tuple
 	    d_in_prev = d_in				#save previous values
 	    d_out_prev = d_out
+	    p_prev=p
+
             cycle_s_arr[cycle_s_arr_i]=(time.time()-StartT)
 	    cycle_s_arr_i+=1
 	    if cycle_s_arr_i >= len(cycle_s_arr):
