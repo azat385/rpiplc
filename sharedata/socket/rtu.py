@@ -70,7 +70,7 @@ d_out_prev=(0,0)*4
 try: 
 	shared["rtu_sleep_ms"]
 except: 
-	shared["rtu_sleep_ms"]=50.0
+	shared["rtu_sleep_ms"]=10.0
 while (1):
   try:
    for slaveId in slavesArr:

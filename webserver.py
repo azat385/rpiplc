@@ -10,7 +10,7 @@ def get_data(host = '127.0.0.1',port = '11211'):
 	shared.behaviors = {"tcp_nodelay": True, "ketama": True}
         str_data = '<head>\n<meta http-equiv="refresh" content="20">\n</head>\n'
 	str_data = str_data + '<b>Data of internal memchache server:</b></br>\n'
-	str_data = str_data + str(time.strftime("%x %X %Z", time.gmtime())) + '</br>\n'
+	str_data = str_data + str(time.strftime("%x %X %Z", time.localtime())) + '</br>\n'
 	dict_data = shared.get_multi( m.keys())
 	for k,v in sorted(dict_data.items()):
 		str_data = str_data + str(k) + " : " + str(v) + " </br>\n"

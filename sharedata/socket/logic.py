@@ -20,7 +20,7 @@ def get_arg(____default_sleep_delay=50.0, argv=None):
     return ____sleep_delay/1000
 
 def main():
-    sleep_delay=get_arg(50.0) #gets value in sec for delay
+    sleep_delay=get_arg(55.0) #gets value in sec for delay
     #shared = memcache.Client(['127.0.0.1:11211'], debug=0)
     shared = pylibmc.Client(["127.0.0.1"], binary=True)
     shared.behaviors = {"tcp_nodelay": True, "ketama": True}
