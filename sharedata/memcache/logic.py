@@ -2,6 +2,7 @@
 import time
 import pylibmc
 import traceback
+import mytimer
 
 def get_arg(____default_sleep_delay=50.0, argv=None):
     import sys
@@ -34,41 +35,44 @@ def main():
     timer1_start=time.time()
     timer1=0
     p_prev=0
+    do_once=0
     while (1):
         try:
 	    #value = shared.get_multi(['d_in', 'cpu'])
 	    #get inputs
 	    d_in = list(shared["d_in"])			#read inputs and change tuple to list
 	    d_in = [int(not(i)) for i in d_in]		#invert all inputs for human understending
-	
+	    
+	    #do smth 
+	    if not do_once:
+		t1 = mytimer.TON(d_in[0])
+		t2 = mytimer.TOFF(d_in[1])
+		do_once=1
+
 	    #main logic
 	    d_out[0] = d_in[0]
 	    d_out[1] = d_in[1]
    	    if d_out <> d_out_prev : raise myException
-	    p = d_out[1]
 
 	    d_raise = lambda x,y: 1 if x and not(y) else 0
 	    if (d_raise(d_in[1],d_in_prev[1]) and not(d_in[0])): d_out[2] = 1
 	    if (d_raise(d_in[0],d_in_prev[0])): d_out[2] = 0
             if d_raise(d_in[0],d_in_prev[0]): d_out[3] = int(not(d_out[3]))
 	    
-	    #print d_out[1],d_out_prev[1],timer1,time.time()-timer1_start,"\r"
-	    if d_raise(d_out[1],d_out_prev[1])==1 :	
-		timer1_start=time.time()
-		timer1 = 1
-		print "Timer started"
-            if d_raise(d_out_prev[1],d_out[1]): 
-		d_out[4]=0
-		timer1 = 0
-		print "Timer reset"
-	    if time.time()-timer1_start>=3.0 and timer1==1 :d_out[4]=1
-
+	    if d_raise(d_in[0],d_in_prev[0]): 
+		t_started = time.time()
+		print t_started
+	    t1.out(d_in[0],7)
+	    if d_raise(t1.do,d_out[4]): print time.time()-t_started
+	    d_out[4] = t1.do
+	    t2.out(d_in[1],7)
+	    d_out[5] = t2.do
+	    #print "t1",t1.out_str(),"t2",t2.out_str()
 
 	    #write outputs
 	    shared["d_out"] = tuple(d_out)		#write current output and change list to tuple
 	    d_in_prev = d_in				#save previous values
 	    d_out_prev = d_out
-	    p_prev=p
 
             cycle_s_arr[cycle_s_arr_i]=(time.time()-StartT)
 	    cycle_s_arr_i+=1

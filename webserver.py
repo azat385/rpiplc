@@ -17,7 +17,7 @@ def get_data(host = '127.0.0.1',port = '11211'):
 	str_data = str_data + "-"*30 + " </br>\n"
 	return str_data;
 
-PORT_NUMBER = 8080
+PORT_NUMBER = 8385
 
 #This class will handles any incoming request from
 #the browser 

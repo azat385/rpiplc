@@ -78,8 +78,11 @@ while (1):
 	rr=tkmc.execute(slaveId, tkCst.READ_DISCRETE_INPUTS, 0,regsSp)
 	#rq=input_assign(rr)#inverted array
 	#wr=logic(rq)
-	d_out=shared["d_out"]
-
+	try:
+		d_out=shared["d_out"]
+	except:
+		shared["d_out"]=d_out_prev
+		d_out=shared["d_out"]
 	if d_out_prev<>d_out:
 	     tkmc.execute(slaveId, tkCst.WRITE_MULTIPLE_COILS, 0, output_value=d_out)
 	     d_out_prev=d_out
