@@ -35,14 +35,14 @@ import ImageDraw
 import ImageFont
 
 global rotate_deg
-rotate_deg = 0
+rotate_deg = 180
 
 def my_callback(intCh):
 	global rotate_deg
 	if GPIO.input(25)==GPIO.input(22):	
 		GPIO.output(22, not GPIO.input(25))
 		#print GPIO.input(25),GPIO.input(22)
-		rotate_deg = 180 if GPIO.input(22) else 0
+		rotate_deg = 0 if GPIO.input(22) else 180
 	return GPIO.input(22)
 
 #from get_str_arr_from_web import get_arr
@@ -70,7 +70,7 @@ disp = LCD.PCD8544(DC, RST, spi=SPI.SpiDev(SPI_PORT, SPI_DEVICE, max_speed_hz=40
 #disp = LCD.PCD8544(DC, RST, SCLK, DIN, CS)
 
 # Initialize library.
-disp.begin(contrast=30)
+disp.begin(contrast=40)
 
 # Clear display.
 disp.clear()

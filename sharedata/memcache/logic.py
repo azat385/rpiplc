@@ -62,7 +62,7 @@ def main():
 	    if d_raise(d_in[0],d_in_prev[0]): 
 		t_started = time.time()
 		print t_started
-	    t1.out(d_in[0],7)
+	    t1.out(d_in[0],3)
 	    if d_raise(t1.do,d_out[4]): print time.time()-t_started
 	    d_out[4] = t1.do
 	    t2.out(d_in[1],7)

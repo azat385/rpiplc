@@ -114,7 +114,7 @@ from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
 import cgi
 import ssl
 
-PORT_NUMBER = 8080
+PORT_NUMBER = 80
 global m1
 m1 =  myclass()
 mystr = ["МИН","СИНЕ","ЯРАТАМ","ЛИЛИЯМ","ҖАНЫМ","МАТУРЫМ","КАДЕРЛЕМ","АЛТЫНЫМ"]
