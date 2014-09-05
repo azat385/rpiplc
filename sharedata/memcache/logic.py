@@ -36,6 +36,7 @@ def main():
     timer1=0
     p_prev=0
     do_once=0
+    l003_prev = 0
     while (1):
         try:
 	    #value = shared.get_multi(['d_in', 'cpu'])
@@ -47,28 +48,46 @@ def main():
 	    if not do_once:
 		t1 = mytimer.TON(d_in[0])
 		t2 = mytimer.TOFF(d_in[1])
+		t3 = mytimer.TON(0)
+		t4 = mytimer.BLINK(0)
 		do_once=1
 
-	    #main logic
-	    d_out[0] = d_in[0]
-	    d_out[1] = d_in[1]
-   	    if d_out <> d_out_prev : raise myException
-
-	    d_raise = lambda x,y: 1 if x and not(y) else 0
-	    if (d_raise(d_in[1],d_in_prev[1]) and not(d_in[0])): d_out[2] = 1
-	    if (d_raise(d_in[0],d_in_prev[0])): d_out[2] = 0
-            if d_raise(d_in[0],d_in_prev[0]): d_out[3] = int(not(d_out[3]))
+	    # main logic------------------------------------begin-----------------
+	    if not t3.do:
+	    	d_out[0] = d_in[0]
+	    	d_out[1] = d_in[1]
+	
+	    	d_raise = lambda x,y: 1 if x and not(y) else 0
+	    	if (d_raise(d_in[1],d_in_prev[1]) and not(d_in[0])): d_out[2] = 1
+	    	if (d_raise(d_in[0],d_in_prev[0])): d_out[2] = 0
+            	if d_raise(d_in[0],d_in_prev[0]): d_out[3] = int(not(d_out[3]))
 	    
-	    if d_raise(d_in[0],d_in_prev[0]): 
-		t_started = time.time()
-		print t_started
-	    t1.out(d_in[0],3)
-	    if d_raise(t1.do,d_out[4]): print time.time()-t_started
-	    d_out[4] = t1.do
-	    t2.out(d_in[1],7)
-	    d_out[5] = t2.do
-	    #print "t1",t1.out_str(),"t2",t2.out_str()
+	    	t1.out(d_in[0],3)
+	    	d_out[4] = t1.do
 
+	    	t2.out(d_in[1],7)
+	    	d_out[5] = t2.do
+
+	    l001 = not(1 in d_in[:7])
+	    t3.out(l001,10)
+	    l002 = t3.do
+	    #print t3.out_str()
+	    t4.out(l002,0.005,0.005)
+	    l003 = t4.do
+	    if mytimer.get_on(l003,l003_prev):
+		if t4.count == 1:
+		    d_out[0] = 1
+		else:
+		    d_out_on = d_out.index(1)
+		    d_out[d_out_on] = 0
+		    d_out_on +=1
+		    if d_out_on >= len(d_out): d_out_on = 0
+		    d_out[d_out_on] = 1
+		    #print d_out_on, d_out
+	    l003_prev = l003
+	    #print t4.out_str() # debuf msg
+	    
+	    # main logic--------------------------------end--------------------
 	    #write outputs
 	    shared["d_out"] = tuple(d_out)		#write current output and change list to tuple
 	    d_in_prev = d_in				#save previous values

@@ -19,6 +19,7 @@ DELAY_VALUE_DEFAULT = 5
 get_edge = lambda x,y: 1 if x and (not y) else 0 
 get_on = lambda x,y: get_edge(x,y)
 get_off = lambda x,y: get_edge(y,x)
+get_both = lambda x,y: get_edge(x,y) or get_edge(y,x)
 # classes
 class TON(object):
 	#name_str = "TON"
@@ -74,7 +75,7 @@ class TOFF(TON):
 		TON.__init__(self, not input)	#call parent method with inverted input
 		self.di = input 		#override some parametrs
 	def out(self,input,delay_value = DELAY_VALUE_DEFAULT):
-		TON.out(self, not input)
+		TON.out(self, not input,delay_value)
 		self.di = input
 		self.do = 1 if self.status==RUNNING else 0
 		self.do = self.do or self.di
@@ -101,6 +102,40 @@ class TONOFF(TON):
 class TONF(object):
         def __init__(self,input,delay_value_on = DELAY_VALUE_DEFAULT,delay_value_off = DELAY_VALUE_DEFAULT):
 		return None
+	pass
+class BLINK(object):
+	def __init__(self,input):
+		self.input = input
+		self.input_prev = 0
+		self.on_time = 5
+		self.off_time = 5
+		self.do = 0
+		self.name_str = self.__class__.__name__
+		self.count = 0
+	def out(self,input,on_time,off_time):
+                self.on_time = on_time
+                self.off_time = off_time
+		self.input = input
+		if self.input:
+			if get_on(self.input,self.input_prev): self.change()
+			self.act()
+		else:
+			self.do = 0
+			self.count = 0
+		self.input_prev = self.input
+		return self.do
+	def change(self):
+		self.start_time = time.time()
+		self.do = not self.do
+		self.count += 1
+	def act(self):
+		if self.do: 	# on_state
+			if time.time()-self.start_time > self.on_time: self.change()
+		else:		# off_state
+			if time.time()-self.start_time > self.off_time: self.change()
+        def out_str(self):
+                return bcolors.OKGREEN + "DI:" + bcolors.ENDC + str(self.input)+ \
+                        bcolors.OKGREEN + " DO:" + bcolors.ENDC + str(self.do)
 	pass
 class bcolors:
     HEADER = '\033[95m'
@@ -143,6 +178,7 @@ def main():
 	t2 = TOFF(l1)
 	t3 = TOFF(t1.do)
 	t4 = TONOFF(l1)
+	t5 = BLINK(l1)
 	#t3 = childTOFF(l1)
 	while True:
 	    #try:
@@ -151,12 +187,13 @@ def main():
 		#print "t1: in",int(t1.input),"out",t1.out(l1,v1),"t2: in",int(t2.input),"out",t2.out(t1.out(l1,v1)[0],v1),\
 		#	"the sum:", t1.out(l1,v1)[0] or t2.out(t1.out(l1,v1)[0],v1)[0]
 		#print "t3:in", int(t3.input), "out",t3.out(l1,v1),"DI",t3.di, "DO",t3.do
-		for var,i in zip(("t1","t2","t3","t4"),(t1, t2, t3, t4)):
+		for var,i in zip(("t1","t2","t3","t4","t5"),(t1, t2, t3, t4, t5)):
 			#i.out(l1,v1)
 			t1.out(l1,v1)
 			t2.out(l1,v1)
 			t3.out(t1.do,v1)
 			t4.out(l1,4,8)
+			t5.out(l1,v1,v1)
 			print var,i.out_str(),
 		print
 		time.sleep(1)
