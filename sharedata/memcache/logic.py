@@ -72,16 +72,22 @@ def main():
 	    t3.out(l001,10)
 	    l002 = t3.do
 	    #print t3.out_str()
-	    t4.out(l002,0.005,0.005)
+	    t4.out(l002,0.1,0.1)
 	    l003 = t4.do
 	    if mytimer.get_on(l003,l003_prev):
 		if t4.count == 1:
 		    d_out[0] = 1
+		    d_out_on_change = 1
 		else:
 		    d_out_on = d_out.index(1)
 		    d_out[d_out_on] = 0
-		    d_out_on +=1
-		    if d_out_on >= len(d_out): d_out_on = 0
+		    d_out_on +=d_out_on_change
+		    if d_out_on >= len(d_out): 
+			d_out_on_change =-1
+			d_out_on +=d_out_on_change*2
+		    if d_out_on <= -1:
+			d_out_on_change =1
+			d_out_on = 1
 		    d_out[d_out_on] = 1
 		    #print d_out_on, d_out
 	    l003_prev = l003

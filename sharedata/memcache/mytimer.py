@@ -134,9 +134,63 @@ class BLINK(object):
 		else:		# off_state
 			if time.time()-self.start_time > self.off_time: self.change()
         def out_str(self):
-                return bcolors.OKGREEN + "DI:" + bcolors.ENDC + str(self.input)+ \
-                        bcolors.OKGREEN + " DO:" + bcolors.ENDC + str(self.do)
+                return bcolors.OKGREEN + str(self.__dict__) + bcolors.ENDC
 	pass
+class Var(object):
+	TheList=[]
+	def __init__(self,current=[0],previous=[0]):
+		self.current = list(current)
+		self.previous = list(previous)
+		self.changed = [0]
+		self.changed_on = [0]
+		self.changed_off = [0]
+		self.count_all = 0
+		self.count = 0
+		self.TheList.append(self)
+	def first(self, current):
+		if isinstance(current,(bool,int)):
+			self.current = [int(current)]
+		else:
+			self.current = list(current)
+		#self.changed = []
+		self.previous = self._expander(self.current, self.previous)
+		self.changed = self._expander(self.current, self.changed)
+		#print zip(self.current,self.previous,range(len(self.current)))
+		for cur,prev,i in zip(self.current,self.previous,range(len(self.current))):
+			if cur != prev: 
+				self.changed[i] = 1
+				#print i, self.changed
+				self.count_all +=1
+				if not prev:
+					self.count +=1
+		    	else:
+				self.changed[i] = 0
+				#print i, self.changed
+	def last(self):
+		self.previous = self.current
+	def __call__(self):
+		return  self.current[0] if len(self.current)==1 else self.current
+	def _expander(self,bigger,smaller):
+		diff = len(bigger)-len(smaller)
+		if diff > 0:
+			for _ in range(diff):
+				smaller.append(0)
+		return smaller
+        def out_str(self):
+                return bcolors.OKGREEN + str(self.__dict__) + bcolors.ENDC
+        pass
+"""
+import mytimer
+v1=mytimer.Var()
+v1.first(0);v1.last();v1.out_str()
+"""
+
+class VarList(object):
+	TheList = []
+	def __init__(self, *args, **kw):
+		x = var(*args, **kw)
+		self.TheList.append(x)
+		#return x
 class bcolors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
