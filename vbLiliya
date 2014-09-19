@@ -1,0 +1,53 @@
+Sub Êíîïêà1_Ùåë÷îê()
+    Set myRange = Worksheets(1).Range("A1:A1200")
+    
+    vLookUpValue = Worksheets(2).Cells(10, 1).Text
+    mm = VLookupAll(vLookUpValue, myRange, 1, 10, 4)
+    
+    vLookUpColValue = Worksheets(2).Cells(9, 1).Value + 1
+        
+    For r = 11 To 106
+        vLookUpValue = Worksheets(2).Cells(r, 1).Text
+        mm = VLookupAll(vLookUpValue, myRange, vLookUpColValue, r, 4)
+    Next r
+       
+    
+End Sub
+
+Function VLookupAll(ByVal lookup_value As String, _
+                   ByVal lookup_column As Range, _
+                   ByVal return_value_column As Long, _
+                   ByVal start_row As Long, _
+                   ByVal start_col As Long, _
+                   Optional seperator As String = ", ") As Variant
+
+Application.ScreenUpdating = False
+Dim i As Long
+Dim result() As Variant
+Dim j As Long
+j = 0
+For i = 1 To lookup_column.Rows.Count
+   If Len(lookup_column(i, 1).Text) <> 0 Then
+        If lookup_column(i, 1).Text = lookup_value Then
+            res = lookup_column(i, 1).Offset(0, return_value_column).Text
+            Worksheets(2).Cells(start_row, start_col).Value = res
+            ReDim Preserve result(j)
+            result(j) = res
+            j = j + 1
+            start_col = start_col + 1
+       End If
+   End If
+ Next
+
+'If Len(result) <> 0 Then
+'result = Left(result, Len(result) - Len(seperator))
+'End If
+
+VLookupAll = result
+Application.ScreenUpdating = True
+
+ End Function
+
+
+
+
