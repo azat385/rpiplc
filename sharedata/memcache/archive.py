@@ -31,7 +31,7 @@ def main():
 	# main to run once
 	import sqlite3
 	import datetime
-	db = sqlite3.connect('rpiplc00.db', detect_types=sqlite3.PARSE_DECLTYPES)
+	db = sqlite3.connect('/home/pi/db/rpiplc00.db', detect_types=sqlite3.PARSE_DECLTYPES)
 	c = db.cursor()
 	try:
 		c.execute("""create table dio 

@@ -7,9 +7,12 @@ python rtu.py &
 python logic.py &
 #start webserver to see information from the memcache server localhost:PORT_NUMBER = 8385
 python /home/pi/myscripts/rpiplc/webserver.py &
-#start server to display data on nokia 3110 screen
-python
+# start server to display data on nokia 3110 screen
+# not ready yet 
+#python
 #start archiving server
-python
+python archive.py &
+# start web sql access on port 8377
+python websqlread.py &
 #start watchdog
 
