@@ -56,7 +56,7 @@ GPIO.setmode(GPIO.BCM)     				# set up BCM GPIO numbering
 GPIO.setup(25, GPIO.IN, pull_up_down=GPIO.PUD_UP)     	# set GPIO25 as input (button)
 GPIO.setup(22, GPIO.OUT)                                # set GPIO22 as an output (LED)
 GPIO.remove_event_detect(25)
-GPIO.add_event_detect(25, GPIO.BOTH, callback=my_callback, bouncetime=0)
+GPIO.add_event_detect(25, GPIO.BOTH, callback=my_callback, bouncetime=1)
 # Raspberry Pi hardware SPI config:
 DC = 23
 RST = 24
@@ -70,7 +70,7 @@ disp = LCD.PCD8544(DC, RST, spi=SPI.SpiDev(SPI_PORT, SPI_DEVICE, max_speed_hz=40
 #disp = LCD.PCD8544(DC, RST, SCLK, DIN, CS)
 
 # Initialize library.
-disp.begin(contrast=40)
+disp.begin(contrast=50)
 
 # Clear display.
 disp.clear()
@@ -177,7 +177,7 @@ try:
 	time.sleep(1)
 	#try to get new data from web
 	#mystr_arr2=mystr_arr2 if len(mystr_arr2)>=len(m1.data_get()) else get_arr()
-	mystr_arr2 =[i.decode("utf-8") for i in  m1.get_data()]
+	#mystr_arr2 =[i.decode("utf-8") for i in  m1.get_data()] #decomment when webs.py is active
 	rotate_deg = 180 if GPIO.input(22) else 0
     #----------------------------------------------static write-----------------------------------------------
     while False:

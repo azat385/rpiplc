@@ -22,7 +22,7 @@ try:
 				'ram': psutil.phymem_usage().percent,
 				'cpu_temp': get_cpu_temp(),
 				'date': time.strftime("%y/%m/%d", time.localtime()),
-				'time': time.strftime("%H:%M", time.localtime())
+				'time': time.strftime("%H:%M:%S", time.localtime())
 			})
 	time.sleep(5.0)
 finally:
