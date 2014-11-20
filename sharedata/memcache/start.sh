@@ -20,7 +20,9 @@ sleep $myDelay
 echo "start webserver.py"
 python /home/pi/myscripts/rpiplc/webserver.py &
 # start server to display data on nokia 3110 screen
-# not ready yet 
+sleep $myDelay
+echo "starting disp.py"
+python disp.py &
 #python
 #start archiving server
 #python archive.py &
