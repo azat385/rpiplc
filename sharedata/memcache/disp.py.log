@@ -1,0 +1,15 @@
+Traceback (most recent call last):
+  File "disp.py", line 44, in <module>
+    GPIO.setup(25, GPIO.IN, pull_up_down=GPIO.PUD_UP)     	# set GPIO25 as input (button)
+RuntimeError: No access to /dev/mem.  Try running as root!
+disp.py:45: RuntimeWarning: This channel is already in use, continuing anyway.  Use GPIO.setwarnings(False) to disable warnings.
+  GPIO.setup(22, GPIO.OUT)                                # set GPIO22 as an output (LED)
+disp.py:45: RuntimeWarning: This channel is already in use, continuing anyway.  Use GPIO.setwarnings(False) to disable warnings.
+  GPIO.setup(22, GPIO.OUT)                                # set GPIO22 as an output (LED)
+Press Ctrl-C to quit.
+Traceback (most recent call last):
+  File "disp.py", line 104, in <module>
+    'CPU: '+ str(shared["cpu"])+'%',
+  File "/usr/local/lib/python2.7/dist-packages/pylibmc/client.py", line 156, in __getitem__
+    value = self.get(key)
+_pylibmc.ConnectionError: error 3 from memcached_get(cpu): (18522536) CONNECTION FAILURE, ::rec() returned zero, server has disconnected, host: 127.0.0.1:11211 -> libmemcached/io.cc:456

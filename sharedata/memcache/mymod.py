@@ -60,7 +60,7 @@ class cycle_time():
 	def call(self):
 		self.tstamp.append(time.time())
 		if len(self.tstamp)>self.length: self.tstamp.pop(0)
-		if self.i==self.length:
+		if self.i>=self.length:
 			self.i = 0
 			self.cycle_s_arr = [j-i for i, j in zip(self.tstamp[:-1], self.tstamp[1:])]
 	                self.cycle_average = round((sum(self.cycle_s_arr)/float(len(self.cycle_s_arr)))*1000,2)
