@@ -9,8 +9,8 @@ echo "starting cpu.py"
 python cpu.py &
 #start read/write data M-7050D via USB0X/tty serail port adapter
 sleep $myDelay
-echo "starting mrtu.py"
-python mrtu.py &
+echo "starting rtuSerial.py"
+python rtuSerial.py &
 #start logic cycles
 sleep $myDelay
 echo "starting logic.py"
