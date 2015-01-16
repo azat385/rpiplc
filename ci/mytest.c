@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
     int set_coil_value = 0b00000001;
     int const debug = 0;
     int print_ms=1000;
-    n_loop = 1000000;
+    n_loop = 10000000;
     regs = 8;
 
     ctx = modbus_new_rtu("/dev/ttyUSB0", 115200, 'O', 8, 1);
