@@ -33,13 +33,23 @@ uint8_t *get_arr(int value){
             }
     return array;
 }
+void print_arr(char name[50],uint8_t *array, int len){
+    int i;
+    //printf("%d %d %d \n",sizeof(array),sizeof(array[0]),sizeof(array)/sizeof(array[0]));
+    printf("%s\t",name);
+    for (i=0;i<len;i++){
+        printf("%u ",array[i]);}
+    printf("\n");
+    //free(array); array=NULL;
+}
+
 /* Tests based on PI-MBUS-300 documentation */
 int main(int argc, char *argv[])
 {
     uint8_t *tab_bit;
     uint16_t *tab_reg;
     modbus_t *ctx;
-    int i,j,updown;
+    int i,j,updown,changed;
     int nb_points;
     double elapsed;
     double cycle_ms;
@@ -55,11 +65,13 @@ int main(int argc, char *argv[])
     uint8_t *set_coil;//[8];// = {1,0,1,0,1,1,0,1};
     set_coil = malloc(sizeof(uint8_t) * 8);
     int set_coil_value = 0b00000001;
-    int const debug = 0;
+    int const debug = 1;
     int print_ms=1000;
     n_loop = 10000000;
     regs = 8;
-
+    uint8_t di[8]={0},di_prev[8]={0},doo[8]={0},doo_prev[8]={0};
+    //di=di_prev=doo=doo_prev = { 0 };//{0,0,0,0,0,0,0,0};
+    //uint8_t di11[8] = {0};
     ctx = modbus_new_rtu("/dev/ttyUSB0", 115200, 'O', 8, 1);
     modbus_set_slave(ctx, 5);
 
@@ -78,12 +90,52 @@ int main(int argc, char *argv[])
 
     printf("READ BITS\n\n");
 
-    nb_points = regs;
     start = gettime_ms();
     //modbus_write_bit(ctx,3,1);
 
-    for (i=0; i<n_loop; i++) {
-	    //set_coil = get_arr(set_coil_value);
+    for (i=1; i<n_loop; i++) {
+        rc = modbus_read_bits(ctx, 32, regs, tab_bit);
+	//if (debug){for (j=0;j < rc;j++) {printf("%u ",tab_bit[j]);} printf("\n");}
+	//printf("number of bits:%u %u \n",tab_bit[0],tab_bit[1]);
+        if (rc == -1) {
+            fprintf(stderr, "%s\n", modbus_strerror(errno));
+            free(tab_bit);
+	    modbus_close(ctx);
+    	    modbus_free(ctx);
+            return -1;
+	    break;
+            }
+	//print_arr("tab_bit",tab_bit,8);
+	for (j=0; j<8; j++){
+		di[j] = tab_bit[j];
+		doo[j] = !di[j];
+		}
+	//print_arr("DI",doo,8);print_arr("DO",doo,8);
+	changed = 0;
+	for (j=0; j<8; j++){
+		if (doo[j]!=doo_prev[j]) {
+			changed = 1;
+			printf("changed\n");
+			break;
+			}
+		}
+	//print_arr("DO",doo,8);print_arr("DO_prev",doo_prev,8);
+	if (changed==1) {
+		rc = modbus_write_bits(ctx,0,8,doo);
+		printf("change DOs\n");
+	     	for (j=0; j<8; j++){doo_prev[j] = doo[j];}
+		if (rc == -1) {
+            		fprintf(stderr, "%s\n", modbus_strerror(errno));
+            		modbus_close(ctx);
+            		modbus_free(ctx);
+            		return -1;
+            		break;
+	   		}
+		}
+
+
+/*
+    //set_coil = get_arr(set_coil_value);
 	for (j = 0; j < 8; j++) {
             set_coil[j] = (set_coil_value >> j) & 1;
             if (debug){printf("%d",set_coil[j]);}
@@ -97,23 +149,12 @@ int main(int argc, char *argv[])
 	if (set_coil_value==1) updown=1;
 	if (set_coil_value==128) updown=0;
     	set_coil_value = updown ? set_coil_value<<1 : set_coil_value>>1;
-        rc = modbus_read_bits(ctx, 0, nb_points, tab_bit);
-	if (debug){for (j=0;j < rc;j++) {printf("%u ",tab_bit[j]);} printf("\n");}
-	//printf("%x \n", tab_bit);
-	//printf("number of bits:%u %u \n",tab_bit[0],tab_bit[1]);
-        if (rc == -1) {
-            fprintf(stderr, "%s\n", modbus_strerror(errno));
-            free(tab_bit);
-    	    free(tab_reg);
-	    modbus_close(ctx);
-    	    modbus_free(ctx);
-            return -1;
-        }
+*/
     if (!(i % print_ms)){
 	end = gettime_ms();
 	elapsed = end - start;
 	cycle_ms = elapsed/print_ms;
-	printf("i=%d %.3f ms DO: ",i,cycle_ms);
+	printf("i=%d %.3f ms DI: ",i,cycle_ms);
 	for (j=0;j < rc;j++) {printf("%u ",tab_bit[j]);} printf("\n");
 	start = gettime_ms();
 	}
