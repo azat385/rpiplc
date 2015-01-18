@@ -67,13 +67,15 @@ int main(int argc, char *argv[])
     int set_coil_value = 0b00000001;
     int const debug = 1;
     int print_ms=1000;
-    n_loop = 10000000;
+    n_loop = 100000000;
     regs = 8;
     uint8_t di[8]={0},di_prev[8]={0},doo[8]={0},doo_prev[8]={0};
-    //di=di_prev=doo=doo_prev = { 0 };//{0,0,0,0,0,0,0,0};
-    //uint8_t di11[8] = {0};
-    ctx = modbus_new_rtu("/dev/ttyUSB0", 115200, 'O', 8, 1);
-    modbus_set_slave(ctx, 5);
+
+    // for TCP
+    ctx = modbus_new_tcp("192.168.1.22", 502);
+    // for RTU
+    //ctx = modbus_new_rtu("/dev/ttyUSB0", 115200, 'O', 8, 1);
+    modbus_set_slave(ctx, 1);
 
     if (modbus_connect(ctx) == -1) {
         fprintf(stderr, "Connexion failed: %s\n",
@@ -94,11 +96,14 @@ int main(int argc, char *argv[])
     //modbus_write_bit(ctx,3,1);
 
     for (i=1; i<n_loop; i++) {
-        rc = modbus_read_bits(ctx, 32, regs, tab_bit);
+	// ICP DAS M-7050D
+        //rc = modbus_read_bits(ctx, 32, regs, tab_bit);
+	// MOXA M-1801 0x200 8 bits
+	rc = modbus_read_input_bits(ctx, 512, regs, tab_bit);//regs, tab_bit);
 	//if (debug){for (j=0;j < rc;j++) {printf("%u ",tab_bit[j]);} printf("\n");}
 	//printf("number of bits:%u %u \n",tab_bit[0],tab_bit[1]);
         if (rc == -1) {
-            fprintf(stderr, "%s\n", modbus_strerror(errno));
+            fprintf(stderr, "Reading Error: %s\n", modbus_strerror(errno));
             free(tab_bit);
 	    modbus_close(ctx);
     	    modbus_free(ctx);
