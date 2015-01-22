@@ -44,7 +44,7 @@ i=0;
 while (1) {
   i++;
   sprintf(myval,"%d",i);
-  //rc = memcached_set(memc, key, strlen(key), myval, strlen(myval), (time_t)0, (uint32_t)0);
+  rc = memcached_set(memc, key, strlen(key), myval, strlen(myval), (time_t)0, (uint32_t)0);
 
   if (rc != MEMCACHED_SUCCESS)
     //fprintf(stderr, "Key stored successfully\n");
