@@ -22,6 +22,8 @@ enum {
     TCP,
     RTU
 };
+
+/*
 uint8_t *get_arr(int value){
     uint8_t array[8];
     //int* array = malloc(sizeof(int) * 8);
@@ -33,6 +35,7 @@ uint8_t *get_arr(int value){
             }
     return array;
 }
+*/
 void print_arr(char name[50],uint8_t *array, int len){
     int i;
     //printf("%d %d %d \n",sizeof(array),sizeof(array[0]),sizeof(array)/sizeof(array[0]));
@@ -72,10 +75,10 @@ int main(int argc, char *argv[])
     uint8_t di[8]={0},di_prev[8]={0},doo[8]={0},doo_prev[8]={0};
 
     // for TCP
-    ctx = modbus_new_tcp("192.168.1.22", 502);
+    //ctx = modbus_new_tcp("192.168.1.22", 502);
     // for RTU
-    //ctx = modbus_new_rtu("/dev/ttyUSB0", 115200, 'O', 8, 1);
-    modbus_set_slave(ctx, 1);
+    ctx = modbus_new_rtu("/dev/ttyUSB0", 115200, 'O', 8, 1);
+    modbus_set_slave(ctx, 5);
 
     if (modbus_connect(ctx) == -1) {
         fprintf(stderr, "Connexion failed: %s\n",
@@ -97,9 +100,9 @@ int main(int argc, char *argv[])
 
     for (i=1; i<n_loop; i++) {
 	// ICP DAS M-7050D
-        //rc = modbus_read_bits(ctx, 32, regs, tab_bit);
+        rc = modbus_read_bits(ctx, 32, regs, tab_bit);
 	// MOXA M-1801 0x200 8 bits
-	rc = modbus_read_input_bits(ctx, 512, regs, tab_bit);//regs, tab_bit);
+	//rc = modbus_read_input_bits(ctx, 512, regs, tab_bit);//regs, tab_bit);
 	//if (debug){for (j=0;j < rc;j++) {printf("%u ",tab_bit[j]);} printf("\n");}
 	//printf("number of bits:%u %u \n",tab_bit[0],tab_bit[1]);
         if (rc == -1) {
