@@ -85,6 +85,15 @@ void arrToStr(uint8_t *array, int len, char *str){
      puts(str);
 }
 
+int memcacheSet(memcached_st *_memc, char *_key, char *_value){
+	memcached_return _memrc;
+	_memrc = memcached_set(_memc, _key, strlen(_key), _value, strlen(_value), (time_t)0, (uint32_t)0);
+	if (_memrc != MEMCACHED_SUCCESS){
+    		fprintf(stderr, "Couldn't store key: %s\n", memcached_strerror(_memc, _memrc));
+    		return 1;//break;
+    		}
+	return 0;
+}
 
 /* Tests based on PI-MBUS-300 documentation */
 int main(int argc, char *argv[])
@@ -215,15 +224,15 @@ for (i=1; i<n_loop; i++) {
 	//print_arr("DO",doo,8);print_arr("DO_prev",doo_prev,8);
 	if (memcmp(di_prev,di,sizeof(di))!=0) {
 		gettime_sec_ms(timeStr);	// get time in STR
-		printf("MAIN: timeStr= %s \n",timeStr);
+		//printf("MAIN: timeStr= %s \n",timeStr);
 		arrToStr(tab_bit, 8, arrStr);	// get arra in STR
-		printf("MAIN: arrStr= %s \n", arrStr);
+		//printf("MAIN: arrStr= %s \n", arrStr);
 		if (use_backend == TCP)
 			strcpy(key, "tcp");
 		else
 			strcpy(key, "rtu");
 		strcat(key, "_di"); puts(key);
-		printf("MAIN: prepare to set to memcache: %s \t %s\n", key, arrStr);
+		//printf("MAIN: prepare to set to memcache: %s \t %s\n", key, arrStr);
 		value = NULL;
 		value=(char *)malloc(100*sizeof(char));
 		strcpy(value, arrStr); puts(value);
@@ -235,11 +244,17 @@ for (i=1; i<n_loop; i++) {
                 }
 		strcat(key,"_arc");
 		strcpy(value,timeStr);	strcat(value,arrStr);	puts(value);
-                printf("set to memcache: %s=%s\n",key, value);
-		memrc = memcached_set(memc, key, strlen(key), value, strlen(value), (time_t)0, (uint32_t)0);
+                printf("MAIN: append to memcache: %s=%s\n",key, value);
+		memrc = memcached_append(memc, key, strlen(key), value, strlen(value), (time_t)0, (uint32_t)0);
 		if (memrc != MEMCACHED_SUCCESS){
+			if (strcmp(memcached_strerror(memc, memrc), "NOT STORED")==0) {
+				printf("we gonna create it first\n");
+				memrc = memcached_set(memc, key, strlen(key), value, strlen(value), (time_t)0, (uint32_t)0);
+			}
+			else {
     			fprintf(stderr, "Couldn't store key: %s\n", memcached_strerror(memc, memrc));
     			break;
+			}
     		}
 		//di_prev = di;
 		memcpy(di_prev,di,sizeof(di));
@@ -282,7 +297,21 @@ for (i=1; i<n_loop; i++) {
 	for (j=0;j < rc;j++) {printf("%u ",tab_bit[j]);} printf("\n");
 	start = gettime_ms();
 	}
-    }
+    if (!(i % (5*print_ms))) {
+	if (use_backend == TCP)
+                strcpy(key, "tcp");
+        else
+              	strcpy(key, "rtu");
+        strcat(key, "_di_arc"); puts(key);
+
+	printf("ADDITIONAL: reset to memcache: %s \t %s\n", key, "reset");
+        memrc = memcached_set(memc, key, strlen(key), "reset", strlen("reset"), (time_t)0, (uint32_t)0);
+        if (memrc != MEMCACHED_SUCCESS) {
+        	fprintf(stderr, "Couldn't store key: %s\n", memcached_strerror(memc, memrc));
+                break;
+                }
+	}
+}
     end = gettime_ms();
     elapsed = end - start;
 
@@ -291,7 +320,7 @@ for (i=1; i<n_loop; i++) {
 
     /* Free the memory */
     free(tab_bit);
-    free(tab_reg);
+    //free(tab_reg);
 
     /* Close the connection */
     modbus_close(ctx);
