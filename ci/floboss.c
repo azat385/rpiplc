@@ -203,14 +203,25 @@ int main(int argc, char *argv[])
     memset(tab_bit, 0, regs * sizeof(uint8_t));
 
     uint16_t tab_reg[128];
-    int regs_start = 7000;
-    int regs_number = 42;
+    int regs_data[4][2]={
+	{7000,42},
+	{7126,6},
+	{7160,14},
+	{7232,16}
+	};
+    int regs_start;
+    int regs_number;
+    int k;
 
     printf("READ BITS\n\n");
     start = gettime_ms();
 
 // main cycle
 for (i=1; i<n_loop; i++) {
+    for (k=0;k<4;k++) {
+	regs_start = regs_data[k][0];
+	regs_number = regs_data[k][1];
+
 	rc = modbus_read_registers(ctx, regs_start, regs_number, tab_reg);
 	//if (debug){for (j=0;j < rc;j++) {printf("%u ",tab_bit[j]);} printf("\n");}
 	//printf("number of bits:%u %u \n",tab_bit[0],tab_bit[1]);
@@ -228,11 +239,13 @@ for (i=1; i<n_loop; i++) {
 
 	//for (j=0; j < rc; j++)
 	//	printf("reg[%d]=%d (0x%X)\n", j, tab_reg[j], tab_reg[j]);
+	printf("\nrequest number %d\n", k);
 	for (j=0; j < (rc+1)/2; j++) {
 		printf("float%02d=%14.3f\t\t", regs_start+2*j, modbus_get_float_cdab(&tab_reg[2*j]));
 		if (!((j+1) % 4))
 			printf("\n");
 		}
+    }//k loop
 	for (j=0; j<8; j++){
 		di[j] = tab_bit[j];
 		doo[j] = !di[j];
