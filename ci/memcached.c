@@ -13,10 +13,12 @@ uint32_t gettime_ms(void)
     return (uint32_t) tv.tv_sec * 1000 + tv.tv_usec / 1000;
 }
 
-int memcacheCMD(char *_cmd, memcached_st *_memc, char *_key, char *_value){
-    memcached_return _memrc;
-switch(_cmd){
-    case "set":
+int memcacheCMD(int _cmd, memcached_st *_memc, char *_key, char *_value){
+memcached_return _memrc;
+
+switch(_cmd)
+    {
+    case 'S' :
         _memrc = memcached_set(_memc, _key, strlen(_key), _value, strlen(_value), (time_t)0, (uint32_t)0);
         if (_memrc != MEMCACHED_SUCCESS){
                 fprintf(stderr, "Couldn't store key: %s\n", memcached_strerror(_memc, _memrc));
@@ -24,23 +26,33 @@ switch(_cmd){
                 }
         return 0;
 	break;
-    case "append":
-	_memrc = memcached_set(_memc, _key, strlen(_key), _value, strlen(_value), (time_t)0, (uint32_t)0);
-
-    default:
+    case 'a' :
+    case 'A' :
+	_memrc = memcached_append(_memc, _key, strlen(_key), _value, strlen(_value), (time_t)0, (uint32_t)0);
+	if (_memrc != MEMCACHED_SUCCESS){
+		if (strcmp(memcached_strerror(_memc, _memrc), "NOT STORED")==0) {
+			printf("we gonna create it first\n");
+			return memcacheCMD('S',_memc,_key,_value);
+		} else {
+			fprintf(stderr, "Couldn't store key: %s\n", memcached_strerror(_memc, _memrc));
+			return 1;
+		}
+	}
+	return 0;
+	break;
+    default :
 	printf("use specified cmds!!!\n");
 	return 1;
     }
+return 1;
 }
-int memcacheAppend();
-
 
 int main(int argc, char **argv) {
   //memcached_servers_parse (char *server_strings);
   memcached_server_st *servers = NULL;
   memcached_st *memc;
   memcached_return rc;
-  char *key = "testKey";
+  char *key = "testKeyNew";
   char *value = "keyv330.330";
   char myval[30];
   int i;
@@ -65,7 +77,7 @@ i=0;
 while (1) {
   i++;
   sprintf(myval,"%d",i);
-  if (memcacheSet(memc,key,myval))
+  if (memcacheCMD('A',memc,key,myval))
     break;//
 
 /*

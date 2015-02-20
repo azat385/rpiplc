@@ -94,7 +94,26 @@ int memcacheSet(memcached_st *_memc, char *_key, char *_value){
     		}
 	return 0;
 }
+uint16_t bswap_16(uint16_t x)
+{
+    return (x >> 8) | (x << 8);
+}
 
+uint32_t bswap_32(uint32_t x)
+{
+    return (bswap_16(x & 0xffff) << 16) | (bswap_16(x >> 16));
+}
+/* Get a float from 4 bytes in Modbus format (ABCD) */
+float modbus_get_float_cdab(const uint16_t *src)
+{
+    float f;
+    uint32_t i;
+
+    i = (((uint32_t)src[0]) << 16) + src[1];
+    memcpy(&f, &i, sizeof(float));
+
+    return f;
+}
 /* Tests based on PI-MBUS-300 documentation */
 int main(int argc, char *argv[])
 {
@@ -110,7 +129,7 @@ int main(int argc, char *argv[])
   uint32_t flags;
     // libmodbus and etc
     uint8_t *tab_bit;
-    uint16_t *tab_reg;
+    //uint16_t *tab_reg;
     modbus_t *ctx;
     int i,j,updown,changed;
     int nb_points;
@@ -130,7 +149,7 @@ int main(int argc, char *argv[])
     int set_coil_value = 0b00000001;
     int const debug = 1;
     int print_ms=1000;
-    n_loop = 1E9;
+    n_loop = 3;//1E9;
     regs = 8;
     uint8_t di[8]={0},di_prev[8]={0},doo[8]={0},doo_prev[8]={0};
     char timeStr[50];
@@ -148,12 +167,12 @@ int main(int argc, char *argv[])
 
   // check up the arguments
   if (argc > 1) {
-        if (strcmp(argv[1], "tcp") == 0) {
+        if (strcmp(argv[1], "fl1") == 0) {
             use_backend = TCP;
-        } else if (strcmp(argv[1], "rtu") == 0) {
+        } else if (strcmp(argv[1], "fl2") == 0) {
             use_backend = RTU;
         } else {
-            printf("Usage:\n  %s [tcp|rtu] - Modbus client to measure data bandwith\n\n", argv[0]);
+            printf("Usage:\n  %s [fl1|fl2] - Modbus client to measure data bandwith\n\n", argv[0]);
             exit(1);
         }
     } else {
@@ -163,11 +182,11 @@ int main(int argc, char *argv[])
     }
 
     if (use_backend == TCP) {
-        ctx = modbus_new_tcp("192.168.1.22", 502);
+        ctx = modbus_new_tcp("192.168.1.1", 502);
 	modbus_set_slave(ctx, 1);
     } else {
-        ctx = modbus_new_rtu("/dev/ttyUSB0", 115200, 'O', 8, 1);
-        modbus_set_slave(ctx, 5);
+        ctx = modbus_new_tcp("192.168.1.2", 502);
+        modbus_set_slave(ctx, 1);
     }
 
     if (modbus_connect(ctx) == -1) {
@@ -183,18 +202,16 @@ int main(int argc, char *argv[])
     tab_bit = (uint8_t *) malloc(regs * sizeof(uint8_t));
     memset(tab_bit, 0, regs * sizeof(uint8_t));
 
+    uint16_t tab_reg[128];
+    int regs_start = 7000;
+    int regs_number = 42;
+
     printf("READ BITS\n\n");
     start = gettime_ms();
 
 // main cycle
 for (i=1; i<n_loop; i++) {
-    if (use_backend == TCP) {
-	// MOXA M-1801 		0x200 8 bits	function 02
-	rc = modbus_read_input_bits(ctx, 512, regs, tab_bit);
-    } else {
-	// ICP DAS M-7050D	0x020 8 bits 	function 01
-        rc = modbus_read_bits(ctx, 32, regs, tab_bit);
-    }
+	rc = modbus_read_registers(ctx, regs_start, regs_number, tab_reg);
 	//if (debug){for (j=0;j < rc;j++) {printf("%u ",tab_bit[j]);} printf("\n");}
 	//printf("number of bits:%u %u \n",tab_bit[0],tab_bit[1]);
         if (rc == -1) {
@@ -208,6 +225,14 @@ for (i=1; i<n_loop; i++) {
 	//printf("%d\t",i);print_arr("tab_bit =",tab_bit,8);
 	//gettime_sec_ms();
 	//sleep(1);
+
+	//for (j=0; j < rc; j++)
+	//	printf("reg[%d]=%d (0x%X)\n", j, tab_reg[j], tab_reg[j]);
+	for (j=0; j < (rc+1)/2; j++) {
+		printf("float%02d=%14.3f\t\t", regs_start+2*j, modbus_get_float_cdab(&tab_reg[2*j]));
+		if (!((j+1) % 4))
+			printf("\n");
+		}
 	for (j=0; j<8; j++){
 		di[j] = tab_bit[j];
 		doo[j] = !di[j];

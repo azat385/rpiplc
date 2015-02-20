@@ -10,7 +10,7 @@ python cpu.py &
 #start read/write data M-7050D via USB0X/tty serail port adapter
 sleep $myDelay
 echo "starting rtuSerial.py"
-python rtuSerial.py &
+#python rtuSerial.py &
 #start logic cycles
 sleep $myDelay
 echo "starting logic.py"
